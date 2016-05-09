@@ -38,11 +38,20 @@ public:
         }
         bool checkConstraint(int var){
                 for(int i=0;i<size;i++){
-                        int diff = var-i;
-                        if(board[i]==board[var])
+                        if(var==i)
+                                continue;
+                        if(board[i]==-1)
+                                continue;
+                        if(board[i]==board[var]){
                                 return false;
-                        if(board[i]+diff == board[var])
+                        }
+                        int diff = i-var;
+                        if(board[i] == board[var]+diff){
                                 return false;
+                        }
+                        if(board[i] == board[var]-diff){
+                                return false;
+                        }
                 }
                 return true;
         }
@@ -78,6 +87,31 @@ bool btandfcandmrv(nqueen state,choicelist choices,int chosen = -1){
         }
         if(chosen != -1){
                 updateList(state,choices,chosen);
+        }
+        int var = -1;
+        //selece unassigned variavle(must fix)
+        for(int i=0;i<state.size;i++){
+                if(state.board[i]==-1){
+                        var = i;
+                        break;
+                }
+        }
+        for(auto it = choices[var].begin();it!=choices[var].end();it++){
+                int value = *it;
+                state.board[var] = value;
+                if(state.checkConstraint(var)){
+                        choicelist newone = choices;
+                        newone[var].clear();
+                        newone[var].insert(value);
+                        bool result = btandfcandmrv(state,newone,var);
+                        if(result)
+                                return true;
+                        else
+                                state.board[var] = -1;
+                }
+                else{
+                        state.board[var] = -1;
+                }
         }
         return false;
 }
