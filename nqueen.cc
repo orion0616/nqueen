@@ -76,6 +76,9 @@ void updateList(const nqueen& state, choicelist& choices, int where){
                 if(where == i)
                         continue;
                 choices[i].erase(state.board[where]);
+                int diff = i-where;
+                choices[i].erase(state.board[where]+diff);
+                choices[i].erase(state.board[where]-diff);
         }
         return;
 }
