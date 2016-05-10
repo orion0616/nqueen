@@ -9,9 +9,14 @@
 
 using namespace std;
 
-typedef pair<int,unordered_set<int> > candidate;
-bool operator<(const candidate& a,const candidate& b){
-        return a.second.size() < b.second.size();
+// typedef pair<int,unordered_set<int> > candidate;
+
+// bool operator<(const candidate& a,const candidate& b){
+//         return a.second.size() < b.second.size();
+// }
+
+bool operator<(const pair<int,int>& a, const pair<int,int>& b){
+	return a.second < b.second;
 }
 
 template<class T>
