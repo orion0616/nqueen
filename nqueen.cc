@@ -71,7 +71,7 @@ public:
         }
 };
 
-void updateList(const nqueen& state, UnassignedBinaryHeap& choices, int where){
+bool updateList(const nqueen& state, UnassignedBinaryHeap& choices, int where){
         int num;
         for(int i=0;i<state.size;i++){
                 int diff = i-where;
@@ -80,34 +80,33 @@ void updateList(const nqueen& state, UnassignedBinaryHeap& choices, int where){
                 if((num = choices.find(i)) != -1){
                         //たて
                         choices.a[num].second.erase(state.board[where]);
-                        // cout << i << "から" << state.board[where] << "erase" << endl;
                         //斜め
                         if(state.board[where]+diff < state.size){
                                 choices.a[num].second.erase(state.board[where]+diff);
-                                // cout << i << "から" << state.board[where]+diff << "erase" << endl;
                         }
                         if(state.board[where]-diff >= 0){
                                 choices.a[num].second.erase(state.board[where]-diff);
-                                // cout << i << "から" << state.board[where]-diff << "erase" << endl;
+                        }
+                        if(choices.a[num].second.empty()){
+                                return false;
                         }
                         choices.bubbleUp(num);
-
                 }
         }
-        return;
+        return true;
 }
 
 bool btandfcandmrv(nqueen state,UnassignedBinaryHeap choices,int chosen = -1){
         if(state.isComplete()){
-                // state.printBoard();
+                state.printBoard();
                 return true;
         }
         if(chosen != -1){
-                updateList(state,choices,chosen);
+                if(!updateList(state,choices,chosen))
+                        return false;
         }
         int var = -1;
         candidate x;
-        //select unassigned variavle(must fix)
         while(var == -1){
                 x = choices.findMin();
                 if(state.board[x.first] == -1){
@@ -119,12 +118,10 @@ bool btandfcandmrv(nqueen state,UnassignedBinaryHeap choices,int chosen = -1){
                 int value = *it;
                 state.board[var] = value;
                 if(state.checkConstraint(var)){
-                        // cout << var << "に" << value << endl;
                         bool result = btandfcandmrv(state,choices,var);
                         if(result)
                                 return true;
                         else{
-                                // cout << "mistake" << endl;
                                 state.board[var] = -1;
                         }
                 }
