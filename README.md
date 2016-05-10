@@ -5,3 +5,4 @@
 
 ##TODO
 - degree heuristic
+- arc consistency
