@@ -74,11 +74,24 @@ public:
 void updateList(const nqueen& state, UnassignedBinaryHeap& choices, int where){
         int num;
         for(int i=0;i<state.size;i++){
+                int diff = i-where;
                 if(where == i)
                         continue;
-                if((num = choices.find(state.board[where]))== -1){
+                if((num = choices.find(i)) != -1){
+                        //たて
                         choices.a[num].second.erase(state.board[where]);
+                        // cout << i << "から" << state.board[where] << "erase" << endl;
+                        //斜め
+                        if(state.board[where]+diff < state.size){
+                                choices.a[num].second.erase(state.board[where]+diff);
+                                // cout << i << "から" << state.board[where]+diff << "erase" << endl;
+                        }
+                        if(state.board[where]-diff >= 0){
+                                choices.a[num].second.erase(state.board[where]-diff);
+                                // cout << i << "から" << state.board[where]-diff << "erase" << endl;
+                        }
                         choices.bubbleUp(num);
+
                 }
         }
         return;
@@ -92,31 +105,33 @@ bool btandfcandmrv(nqueen state,UnassignedBinaryHeap choices,int chosen = -1){
         if(chosen != -1){
                 updateList(state,choices,chosen);
         }
-        // int var = -1;
-        // //selece unassigned variavle(must fix)
-        // for(int i=0;i<state.size;i++){
-        //         if(state.board[i]==-1){
-        //                 var = i;
-        //                 break;
-        //         }
-        // }
-        // for(auto it = choices[var].begin();it!=choices[var].end();it++){
-        //         int value = *it;
-        //         state.board[var] = value;
-        //         if(state.checkConstraint(var)){
-        //                 choicelist newone = choices;
-        //                 newone[var].clear();
-        //                 newone[var].insert(value);
-        //                 bool result = btandfcandmrv(state,newone,var);
-        //                 if(result)
-        //                         return true;
-        //                 else
-        //                         state.board[var] = -1;
-        //         }
-        //         else{
-        //                 state.board[var] = -1;
-        //         }
-        // }
+        int var = -1;
+        candidate x;
+        //select unassigned variavle(must fix)
+        while(var == -1){
+                x = choices.findMin();
+                if(state.board[x.first] == -1){
+                        var = x.first;
+                }
+        }
+        choices.remove();
+        for(auto it = x.second.begin();it!=x.second.end();it++){
+                int value = *it;
+                state.board[var] = value;
+                if(state.checkConstraint(var)){
+                        // cout << var << "に" << value << endl;
+                        bool result = btandfcandmrv(state,choices,var);
+                        if(result)
+                                return true;
+                        else{
+                                // cout << "mistake" << endl;
+                                state.board[var] = -1;
+                        }
+                }
+                else{
+                        state.board[var] = -1;
+                }
+        }
         return false;
 }
 
@@ -125,16 +140,16 @@ int main(){
         cin >> n;
         nqueen init(n);
         unordered_set<int> all;
-        UnassignedBinaryHeap list;
+        UnassignedBinaryHeap choices;
         for(int i=0;i<n;i++){
                 all.insert(i);
         }
         for(int i=0;i<n;i++){
-                list.add(make_pair(i,all));
+                choices.add(make_pair(i,all));
         }
         struct timeval start,goal;
         gettimeofday(&start,NULL);
-        btandfcandmrv(init,list);
+        btandfcandmrv(init,choices);
         gettimeofday(&goal,NULL);
         printTime(start,goal);
 }
