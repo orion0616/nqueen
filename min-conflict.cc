@@ -40,6 +40,8 @@ public:
                 conflictlist.clear();
                 unordered_set<int> index;
                 for(int i=0;i<size;i++){
+                        if(index.find(i) != index.end())
+                                continue;
                         for(int j=i+1;j<size;j++){
                                 int diff = j-i;
                                 if(board[i]==board[j] || board[i]+diff == board[j] || board[i]-diff == board[j]){
@@ -59,25 +61,6 @@ public:
                 else
                         return false;
         }
-        bool checkConstraint(int var){
-                for(int i=0;i<size;i++){
-                        if(var==i)
-                                continue;
-                        if(board[i]==-1)
-                                continue;
-                        if(board[i]==board[var]){
-                                return false;
-                        }
-                        int diff = i-var;
-                        if(board[i] == board[var]+diff){
-                                return false;
-                        }
-                        if(board[i] == board[var]-diff){
-                                return false;
-                        }
-                }
-                return true;
-        }
         void printBoard(){
                 for(int i=0;i<size;i++){
                         for(int j=0;j<size;j++){
@@ -94,7 +77,6 @@ public:
 
 int conflict(nqueen& state,int var){
         int diff,num;
-        // int choice[state.size];
         varBinaryHeap bh;
         for(int i=0;i<state.size;i++){
                 bh.add(make_pair(i,0));
@@ -103,7 +85,6 @@ int conflict(nqueen& state,int var){
                 if(var == i)
                         continue;
                 else{
-                        // choice[state.board[i]]++;
                         num = bh.find(state.board[i]);
                         bh.a[num].second++;
                         bh.trickleDown(num);
@@ -112,10 +93,8 @@ int conflict(nqueen& state,int var){
                                 num = bh.find(state.board[i]+diff);
                                 bh.a[num].second++;
                                 bh.trickleDown(num);
-                                // choice[state.board[i]+diff]++;
                         }
                         if(0<= state.board[i]-diff){
-                                // choice[state.board[i]-diff]++;
                                 num = bh.find(state.board[i]-diff);
                                 bh.a[num].second++;
                                 bh.trickleDown(num);
@@ -136,16 +115,6 @@ bool minconflict(nqueen& state,int maxsteps){
                 //conflictを起こしてるやつをrandom抽出
                 int var = state.conflictlist[rnd()%state.conflictlist.size()];
                 //conflictが一番少なくなる位置へ移動
-                // int min = 1000000;
-                // int tmp;
-                // int value;
-                // for(int i=0;i<state.size;i++){
-                //         tmp = conflict(state,var,i);
-                //         if(min > tmp){
-                //                 min = tmp;
-                //                 value = i;
-                //         }
-                // }
                 int value = conflict(state,var);
                 state.board[var] = value;
         }
