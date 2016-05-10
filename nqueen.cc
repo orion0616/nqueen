@@ -122,7 +122,7 @@ int remove_inconsistent_values(nqueen& state, UnassignedBinaryHeap& choices, Arc
         int wherex = choices.find(arc.first);
         int wherey = choices.find(arc.second);
         unordered_set<int> x,y;
-        //assignedです
+        //assigned
         if(wherex == -1){
                 x.insert(state.board[arc.first]);
                 flagx = true;
@@ -193,6 +193,13 @@ bool btandfcandmrv(nqueen state,UnassignedBinaryHeap choices, int chosen = -1){
         }
         if(chosen != -1){
                 if(!updateListbyAC3(state,choices)){
+                        // for(int i=0;i<choices.a.size();i++){
+                        //         cout << choices.a[i].first << ":";
+                        //         for(auto it = choices.a[i].second.begin();it!=choices.a[i].second.end();it++){
+                        //                 cout << *it;
+                        //         }
+                        //         cout << endl;
+                        // }
                         return false;
                 }
         }
@@ -208,6 +215,7 @@ bool btandfcandmrv(nqueen state,UnassignedBinaryHeap choices, int chosen = -1){
         for(auto it = x.second.begin();it!=x.second.end();it++){
                 int value = *it;
                 state.board[var] = value;
+                // cout << var << "に" << value << endl;
                 if(state.checkConstraint(var)){
                         bool result = btandfcandmrv(state,choices,var);
                         if(result)
