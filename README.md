@@ -5,4 +5,5 @@
 
 ##TODO
 - degree heuristic
-- arc consistency
+- least constraining-value
+- arc consistency for constraint propagation
