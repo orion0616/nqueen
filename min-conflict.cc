@@ -21,13 +21,13 @@ public:
                 mt19937 mt(rnd());
                 size = n;
                 board = new int[n];
-                // for(int i=0;i<n;i++){
-                //         board[i] = -1;
-                // }
-                // initialize();
                 for(int i=0;i<n;i++){
-                        board[i] = mt()%n;
+                        board[i] = -1;
                 }
+                initialize();
+                // for(int i=0;i<n;i++){
+                //         board[i] = mt()%n;
+                // }
         }
         ~nqueen(){
                 delete board;
@@ -37,6 +37,8 @@ public:
                         if(conflictindex.find(i) != conflictindex.end())
                                 continue;
                         for(int j=0;j<size;j++){
+                                if(i==j)
+                                        continue;
                                 int diff = j-i;
                                 if(board[i]==board[j] || board[i]+diff == board[j] || board[i]-diff == board[j]){
                                         if(conflictindex.find(i) == conflictindex.end()){
@@ -49,18 +51,51 @@ public:
                         }
                 }
         }
-        // void initialize(){
-        //         for(int i=0;i<size;i++){
+        void initialize(){
+                //greedy
+                for(int i=0;i<size;i++){
+                        int diff,num;
+                        varBinaryHeap bh;
+                        for(int j=0;j<size;j++){
+                                bh.add(make_pair(j,0));
+                        }
+                        for(int j=0;j<i;j++){
+                                if(i == j)
+                                        continue;
+                                num = bh.find(board[j]);
+                                bh.a[num].second++;
+                                bh.trickleDown(num);
+                                diff = abs(i-j);
+                                if(board[j]+diff < size){
+                                        num = bh.find(board[j]+diff);
+                                        bh.a[num].second++;
+                                        bh.trickleDown(num);
+                                }
+                                if(0<= board[j]-diff){
+                                        num = bh.find(board[j]-diff);
+                                        bh.a[num].second++;
+                                        bh.trickleDown(num);
+                                }
+                        }
+                        vector<pair<int,int> > mins;
+                        pair<int,int> min = bh.findMin();
+                        bh.remove();
+                        mins.push_back(min);
+                        while(bh.findMin().second == mins[0].second){
+                                mins.push_back(bh.findMin());
+                                bh.remove();
+                        }
+                        random_device rnd;
+                        int x = rnd()%mins.size();
 
-        //         }
-        // }
+                        board[i] = mins[x].first;
+                }
+        }
         int size;
         int* board;
         unordered_set<int> conflictindex;
         unordered_set<int> conflictcandidate;
         bool isSolution(){
-                if(conflictindex.empty() && conflictcandidate.empty())
-                        return true;
                 for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
                         for(int i=0;i<size;i++){
                                 if(*it==i)
@@ -161,9 +196,10 @@ void addconflict(nqueen& state, int var,int value){
 
 bool minconflict(nqueen& state,int maxsteps){
         for(int i=0;i<maxsteps;i++){
-                cout << i <<endl;
-                state.printBoard();
+                // cout << i <<endl;
+                // state.printBoard();
                 if(state.isSolution()){
+                        cout << i << endl;
                         // state.printBoard();
                         return true;
                 }
@@ -190,10 +226,10 @@ int main(){
         int n;
         cin >> n;
         struct timeval start,goal;
-        nqueen init(n);
         gettimeofday(&start,NULL);
+        nqueen init(n);
         init.firstconflict();
-        minconflict(init,1000);
+        minconflict(init,100000);
         gettimeofday(&goal,NULL);
         printTime(start,goal);
 }
