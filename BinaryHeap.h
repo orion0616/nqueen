@@ -19,6 +19,10 @@ bool operator<(const pair<int,int>& a, const pair<int,int>& b){
 	return a.second < b.second;
 }
 
+bool operator<(const pair<int,unordered_set<int> > a, const pair<int,unordered_set<int> >& b){
+	return a.second.size() < b.second.size();
+}
+
 template<class T>
 class BinaryHeap {
 public:

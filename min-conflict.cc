@@ -11,6 +11,7 @@
 #include <cmath>
 #include "printTime.h"
 #include "var_binary_heap.h"
+#include "conflict_binary_heap.h"
 
 using namespace std;
 
@@ -32,63 +33,67 @@ public:
         ~nqueen(){
                 delete board;
         }
-        void firstconflict(){
-                for(int i=0;i<size;i++){
-                        if(conflictindex.find(i) != conflictindex.end())
-                                continue;
-                        for(int j=0;j<size;j++){
-                                if(i==j)
-                                        continue;
-                                int diff = j-i;
-                                if(board[i]==board[j] || board[i]+diff == board[j] || board[i]-diff == board[j]){
-                                        if(conflictindex.find(i) == conflictindex.end()){
-                                                conflictindex.insert(i);
-                                        }
-                                        if(conflictindex.find(j) == conflictindex.end()){
-                                                conflictindex.insert(j);
-                                        }
-                                }
-                        }
-                }
-        }
+        // void firstconflict(){
+        //         for(int i=0;i<size;i++){
+        //                 if(conflictindex.find(i) != conflictindex.end())
+        //                         continue;
+        //                 for(int j=0;j<size;j++){
+        //                         if(i==j)
+        //                                 continue;
+        //                         int diff = j-i;
+        //                         if(board[i]==board[j] || board[i]+diff == board[j] || board[i]-diff == board[j]){
+        //                                 if(conflictindex.find(i) == conflictindex.end()){
+        //                                         conflictindex.insert(i);
+        //                                 }
+        //                                 if(conflictindex.find(j) == conflictindex.end()){
+        //                                         conflictindex.insert(j);
+        //                                 }
+        //                         }
+        //                 }
+        //         }
+        // }
         void initialize(){
                 //greedy
+                unordered_set<int> tmp;
                 for(int i=0;i<size;i++){
                         int diff,num;
-                        varBinaryHeap bh;
+                        conflictBinaryHeap bh;
                         for(int j=0;j<size;j++){
-                                bh.add(make_pair(j,0));
+                                bh.add(make_pair(j,tmp));
                         }
                         for(int j=0;j<i;j++){
-                                if(i == j)
-                                        continue;
                                 num = bh.find(board[j]);
-                                bh.a[num].second++;
+                                bh.a[num].second.insert(j);
                                 bh.trickleDown(num);
                                 diff = abs(i-j);
                                 if(board[j]+diff < size){
                                         num = bh.find(board[j]+diff);
-                                        bh.a[num].second++;
+                                        bh.a[num].second.insert(j);
                                         bh.trickleDown(num);
                                 }
                                 if(0<= board[j]-diff){
                                         num = bh.find(board[j]-diff);
-                                        bh.a[num].second++;
+                                        bh.a[num].second.insert(j);
                                         bh.trickleDown(num);
                                 }
                         }
-                        vector<pair<int,int> > mins;
-                        pair<int,int> min = bh.findMin();
+                        vector<pair<int,unordered_set<int> > > mins;
+                        pair<int,unordered_set<int> > min = bh.findMin();
                         bh.remove();
                         mins.push_back(min);
-                        while(bh.findMin().second == mins[0].second){
+                        while(bh.findMin().second.size() == mins[0].second.size()){
                                 mins.push_back(bh.findMin());
                                 bh.remove();
+                                if(bh.size()==0)
+                                        break;
                         }
                         random_device rnd;
                         int x = rnd()%mins.size();
-
                         board[i] = mins[x].first;
+                        for(auto it = mins[x].second.begin();it!=mins[x].second.end();it++){
+                                conflictindex.insert(*it);
+                                conflictindex.insert(i);
+                        }
                 }
         }
         int size;
@@ -203,7 +208,7 @@ bool minconflict(nqueen& state,int maxsteps){
                         // state.printBoard();
                         return true;
                 }
-                cout << " " << state.conflictindex.size() << endl <<endl;
+                // cout << " " << state.conflictindex.size() << endl <<endl;
                 random_device rnd;
                 //conflictを起こしてるやつをrandom抽出
                 // int var = state.conflictlist[rnd()%state.conflictlist.size()];
@@ -225,11 +230,13 @@ bool minconflict(nqueen& state,int maxsteps){
 int main(){
         int n;
         cin >> n;
-        struct timeval start,goal;
+        struct timeval start,goal,ongoing;
         gettimeofday(&start,NULL);
         nqueen init(n);
-        init.firstconflict();
+        gettimeofday(&ongoing,NULL);
+        printTime(start,ongoing);
+        // init.firstconflict();
         minconflict(init,100000);
         gettimeofday(&goal,NULL);
-        printTime(start,goal);
+        printTime(ongoing,goal);
 }
