@@ -204,7 +204,7 @@ bool minconflict(nqueen& state,int maxsteps){
                 // cout << i <<endl;
                 // state.printBoard();
                 if(state.isSolution()){
-                        cout << i << endl;
+                        cout << i << "steps" << endl;
                         // state.printBoard();
                         return true;
                 }
