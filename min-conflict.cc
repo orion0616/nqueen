@@ -33,59 +33,40 @@ public:
         ~nqueen(){
                 delete board;
         }
-        // void firstconflict(){
-        //         for(int i=0;i<size;i++){
-        //                 if(conflictindex.find(i) != conflictindex.end())
-        //                         continue;
-        //                 for(int j=0;j<size;j++){
-        //                         if(i==j)
-        //                                 continue;
-        //                         int diff = j-i;
-        //                         if(board[i]==board[j] || board[i]+diff == board[j] || board[i]-diff == board[j]){
-        //                                 if(conflictindex.find(i) == conflictindex.end()){
-        //                                         conflictindex.insert(i);
-        //                                 }
-        //                                 if(conflictindex.find(j) == conflictindex.end()){
-        //                                         conflictindex.insert(j);
-        //                                 }
-        //                         }
-        //                 }
-        //         }
-        // }
         void initialize(){
                 //greedy
                 unordered_set<int> tmp;
+                vector<pair<int,unordered_set<int> > > example(size);
                 for(int i=0;i<size;i++){
-                        int diff,num;
+                        example[i] = make_pair(i,tmp);
+                }
+                for(int i=0;i<size;i++){
+                        int diff;
                         conflictBinaryHeap bh;
-                        for(int j=0;j<size;j++){
-                                bh.add(make_pair(j,tmp));
-                        }
+                        vector<pair<int,unordered_set<int> > > count = example;
+                        vector<pair<int,unordered_set<int> > > mins;
+                        //同じものを何回も見てるから効率悪そう．新しく追加したとこだけを見れれば，ほぼ計算量ゼロになる
                         for(int j=0;j<i;j++){
-                                num = bh.find(board[j]);
-                                bh.a[num].second.insert(j);
-                                bh.trickleDown(num);
+                                count[board[j]].second.insert(j);
+
                                 diff = abs(i-j);
                                 if(board[j]+diff < size){
-                                        num = bh.find(board[j]+diff);
-                                        bh.a[num].second.insert(j);
-                                        bh.trickleDown(num);
+                                        count[board[j]+diff].second.insert(j);
                                 }
                                 if(0<= board[j]-diff){
-                                        num = bh.find(board[j]-diff);
-                                        bh.a[num].second.insert(j);
-                                        bh.trickleDown(num);
+                                        count[board[j]-diff].second.insert(j);
                                 }
                         }
-                        vector<pair<int,unordered_set<int> > > mins;
-                        pair<int,unordered_set<int> > min = bh.findMin();
-                        bh.remove();
-                        mins.push_back(min);
-                        while(bh.findMin().second.size() == mins[0].second.size()){
-                                mins.push_back(bh.findMin());
-                                bh.remove();
-                                if(bh.size()==0)
-                                        break;
+                        int min = size;
+                        //せめてO(logN)で出したい．多分それができれば解決
+                        for(int j=0;j<size;j++){
+                                if(count[j].second.size()< min){
+                                        min = count[j].second.size();
+                                        mins.clear();
+                                        mins.push_back(count[j]);
+                                }
+                                if(count[j].second.size()==min)
+                                        mins.push_back(count[j]);
                         }
                         random_device rnd;
                         int x = rnd()%mins.size();
@@ -235,7 +216,6 @@ int main(){
         nqueen init(n);
         gettimeofday(&ongoing,NULL);
         printTime(start,ongoing);
-        // init.firstconflict();
         minconflict(init,100000);
         gettimeofday(&goal,NULL);
         printTime(ongoing,goal);
