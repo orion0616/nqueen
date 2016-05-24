@@ -80,16 +80,17 @@ public:
                                 conflictcandidate.insert(kouho);
                                 conflictindex.insert(kouho);
                         }
-                        //add to conflict list
-                        for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
-                                for(int i=0;i<size;i++){
-                                        if(*it==i)
-                                                continue;
-                                        int diff = abs(i-*it);
-                                        if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
-                                                if(conflictindex.find(*it) == conflictindex.end()){
-                                                        conflictindex.insert(*it);
-                                                }
+                }
+                cout << "conflict number " << conflictcandidate.size() << endl;
+                //add to conflict list
+                for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
+                        for(int i=0;i<size;i++){
+                                if(*it==i)
+                                        continue;
+                                int diff = abs(i-*it);
+                                if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
+                                        if(conflictindex.find(*it) == conflictindex.end()){
+                                                conflictindex.insert(*it);
                                         }
                                 }
                         }
