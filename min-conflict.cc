@@ -40,40 +40,57 @@ public:
                 for(int i=0;i<size;i++){
                         example[i] = make_pair(i,tmp);
                 }
+                set<int> up2down;
+                int ru2ld[size*2-1];
+                int lu2rd[size*2-1];
+                //Todo
+                //一番最後にconflictlistに入れる
+                for(int i=0;i<size*2-1;i++){
+                       if(i<size)
+                               up2down.insert(i);
+                       ru2ld[i] = 0;
+                       lu2rd[i] = 0;
+                }
                 for(int i=0;i<size;i++){
-                        int diff;
-                        conflictBinaryHeap bh;
-                        vector<pair<int,unordered_set<int> > > count = example;
-                        vector<pair<int,unordered_set<int> > > mins;
-                        //同じものを何回も見てるから効率悪そう．新しく追加したとこだけを見れれば，ほぼ計算量ゼロになる
-                        for(int j=0;j<i;j++){
-                                count[board[j]].second.insert(j);
-
-                                diff = abs(i-j);
-                                if(board[j]+diff < size){
-                                        count[board[j]+diff].second.insert(j);
+                        bool flag = true;
+                        int kouho,min=100;
+                        int r2lstart = i;
+                        int l2rstart = size-1+i;
+                        for(auto it = up2down.begin();it!=up2down.end();it++){
+                                int r2l = ru2ld[r2lstart+*it];
+                                int l2r = lu2rd[l2rstart-*it];
+                                if(r2l+l2r == 0){
+                                        board[i] = *it;
+                                        ru2ld[r2lstart+*it]++;
+                                        lu2rd[l2rstart-*it]++;
+                                        up2down.erase(it);
+                                        flag = false;
+                                        break;
                                 }
-                                if(0<= board[j]-diff){
-                                        count[board[j]-diff].second.insert(j);
+                                if(r2l+l2r < min){
+                                        kouho = *it;
                                 }
                         }
-                        int min = size;
-                        //せめてO(logN)で出したい．多分それができれば解決
-                        for(int j=0;j<size;j++){
-                                if(count[j].second.size()< min){
-                                        min = count[j].second.size();
-                                        mins.clear();
-                                        mins.push_back(count[j]);
-                                }
-                                if(count[j].second.size()==min)
-                                        mins.push_back(count[j]);
+                        if(flag){
+                                board[i] = kouho;
+                                ru2ld[r2lstart+kouho]++;
+                                lu2rd[l2rstart-kouho]++;
+                                up2down.erase(kouho);
+                                conflictcandidate.insert(kouho);
+                                conflictindex.insert(kouho);
                         }
-                        random_device rnd;
-                        int x = rnd()%mins.size();
-                        board[i] = mins[x].first;
-                        for(auto it = mins[x].second.begin();it!=mins[x].second.end();it++){
-                                conflictindex.insert(*it);
-                                conflictindex.insert(i);
+                        //add to conflict list
+                        for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
+                                for(int i=0;i<size;i++){
+                                        if(*it==i)
+                                                continue;
+                                        int diff = abs(i-*it);
+                                        if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
+                                                if(conflictindex.find(*it) == conflictindex.end()){
+                                                        conflictindex.insert(*it);
+                                                }       
+                                        }
+                                }
                         }
                 }
         }
