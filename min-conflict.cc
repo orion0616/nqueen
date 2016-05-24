@@ -68,6 +68,7 @@ public:
                                         break;
                                 }
                                 if(r2l+l2r < min){
+                                        min = r2l+l2r;
                                         kouho = *it;
                                 }
                         }
@@ -88,7 +89,7 @@ public:
                                         if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
                                                 if(conflictindex.find(*it) == conflictindex.end()){
                                                         conflictindex.insert(*it);
-                                                }       
+                                                }
                                         }
                                 }
                         }
