@@ -34,20 +34,23 @@ public:
                 delete board;
         }
         void initialize(){
+                random_device rnd;
+                mt19937 mt(rnd());
                 //greedy
                 unordered_set<int> tmp;
                 vector<pair<int,unordered_set<int> > > example(size);
                 for(int i=0;i<size;i++){
                         example[i] = make_pair(i,tmp);
                 }
-                set<int> up2down;
+                // set<int> up2down;
+                int up2down[size];
                 int ru2ld[size*2-1];
                 int lu2rd[size*2-1];
                 //Todo
                 //一番最後にconflictlistに入れる
                 for(int i=0;i<size*2-1;i++){
-                       if(i<size)
-                               up2down.insert(i);
+                        if(i<size)
+                                up2down[i] = 0;
                        ru2ld[i] = 0;
                        lu2rd[i] = 0;
                 }
@@ -56,45 +59,53 @@ public:
                         int kouho,min=100;
                         int r2lstart = i;
                         int l2rstart = size-1+i;
-                        for(auto it = up2down.begin();it!=up2down.end();it++){
-                                int r2l = ru2ld[r2lstart+*it];
-                                int l2r = lu2rd[l2rstart-*it];
-                                if(r2l+l2r == 0){
-                                        board[i] = *it;
-                                        ru2ld[r2lstart+*it]++;
-                                        lu2rd[l2rstart-*it]++;
-                                        up2down.erase(it);
+                        int start = mt()%size;
+                        for(int j=0;j<size;j++){
+                                int nj = start+j;
+                                if(nj >= size)
+                                        nj -= size;
+                                int u2d = up2down[nj];
+                                int r2l = ru2ld[r2lstart+nj];
+                                int l2r = lu2rd[l2rstart-nj];
+                                if(u2d+r2l+l2r == 0){
+                                        board[i] = nj;
+                                        ru2ld[r2lstart+nj]++;
+                                        lu2rd[l2rstart-nj]++;
+                                        // up2down.erase(it);
+                                        up2down[nj]++;
                                         flag = false;
                                         break;
                                 }
-                                if(r2l+l2r < min){
-                                        min = r2l+l2r;
-                                        kouho = *it;
+                                if(u2d+r2l+l2r < min){
+                                        min = u2d + r2l+l2r;
+                                        kouho = nj;
                                 }
                         }
                         if(flag){
                                 board[i] = kouho;
                                 ru2ld[r2lstart+kouho]++;
                                 lu2rd[l2rstart-kouho]++;
-                                up2down.erase(kouho);
-                                conflictcandidate.insert(kouho);
-                                conflictindex.insert(kouho);
+                                conflictcandidate.insert(i);
+                                conflictindex.insert(i);
                         }
                 }
-                cout << "conflict number " << conflictcandidate.size() << endl;
                 //add to conflict list
                 for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
+                        // cout << *it << endl;
                         for(int i=0;i<size;i++){
                                 if(*it==i)
                                         continue;
                                 int diff = abs(i-*it);
                                 if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
-                                        if(conflictindex.find(*it) == conflictindex.end()){
-                                                conflictindex.insert(*it);
+                                        // cout << *it << " " << i << endl;
+                                        if(conflictindex.find(i) == conflictindex.end()){
+                                                conflictindex.insert(i);
                                         }
                                 }
                         }
                 }
+                cout << "conflict number " << conflictindex.size() << endl;
+                conflictcandidate.clear();
         }
         int size;
         int* board;
@@ -128,7 +139,7 @@ public:
                         }
                         cout << endl;
                 }
-                // cout << endl;
+                cout << endl;
         }
 };
 
