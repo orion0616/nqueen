@@ -43,9 +43,13 @@ public:
                         example[i] = make_pair(i,tmp);
                 }
                 // set<int> up2down;
-                int up2down[size];
-                int ru2ld[size*2-1];
-                int lu2rd[size*2-1];
+                // vector<int> up2down,ru2ld,lu2rd;
+                int *up2down = (int*)malloc(sizeof(int) * size);
+                int *ru2ld = (int*)malloc(sizeof(int) * size*2-1);
+                int *lu2rd = (int*)malloc(sizeof(int) * size*2-1);
+                // int up2down[size];
+                // int ru2ld[size*2-1];
+                // int lu2rd[size*2-1];
                 //Todo
                 //一番最後にconflictlistに入れる
                 for(int i=0;i<size*2-1;i++){
@@ -54,6 +58,7 @@ public:
                        ru2ld[i] = 0;
                        lu2rd[i] = 0;
                 }
+                cout << "is it here?" << endl;
                 for(int i=0;i<size;i++){
                         bool flag = true;
                         int kouho,min=100;
@@ -106,6 +111,9 @@ public:
                 }
                 cout << "conflict number " << conflictindex.size() << endl;
                 conflictcandidate.clear();
+                free(up2down);
+                free(ru2ld);
+                free(lu2rd);
         }
         int size;
         int* board;
