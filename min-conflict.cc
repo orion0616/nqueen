@@ -58,7 +58,6 @@ public:
                        ru2ld[i] = 0;
                        lu2rd[i] = 0;
                 }
-                cout << "is it here?" << endl;
                 for(int i=0;i<size;i++){
                         bool flag = true;
                         int kouho,min=100;
@@ -109,7 +108,7 @@ public:
                                 }
                         }
                 }
-                cout << "conflict number " << conflictindex.size() << endl;
+                // cout << "conflict number " << conflictindex.size() << endl;
                 conflictcandidate.clear();
                 free(up2down);
                 free(ru2ld);
