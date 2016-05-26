@@ -1,9 +1,11 @@
 #N-Queen
+This is n-queen solver.
 ##Algorithm
-- backtracking depth first search
-- forward checking
+- min-conflicts
 
-##TODO
-- degree heuristic
-- least constraining-value
-- arc consistency for constraint propagation
+##Result
+        1000000
+        4.445682 sec
+
+        137steps
+        1.803549 sec
