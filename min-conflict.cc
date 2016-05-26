@@ -152,36 +152,34 @@ public:
 
 int conflict(nqueen& state,int var){
         int prev = state.board[var];
-        bool flag = true;
-        int kouho,min=1000;
+        int min=1000;
         int r2lstart = var;
-        int l2rstart = size-1+var;
-        int start = mt()%size;
-        for(int j=0;j<size;j++){
-                int nj = start+j;
-                if(nj >= size)
-                        nj -= size;
-                int u2d = up2down[nj];
-                int r2l = ru2ld[r2lstart+nj];
-                int l2r = lu2rd[l2rstart-nj];
-                if(u2d+r2l+l2r == 0){
-                        ru2ld[r2lstart+nj]++;
-                        lu2rd[l2rstart-nj]++;
-                        up2down[nj]++;
-                        flag = false;
-                        break;
+        int l2rstart = state.size-1+var;
+        ru2ld[r2lstart+prev]--;
+        lu2rd[l2rstart-prev]--;
+        up2down[prev]--;
+        vector<int> kouho;
+        for(int j=0;j<state.size;j++){
+                int u2d = up2down[j];
+                int r2l = ru2ld[r2lstart+j];
+                int l2r = lu2rd[l2rstart-j];
+                if(u2d+r2l+l2r==min){
+                    kouho.push_back(j);
                 }
                 if(u2d+r2l+l2r < min){
-                        min = u2d + r2l+l2r;
-                        kouho = nj;
+                        min = u2d+r2l+l2r;
+                        kouho.clear();
+                        kouho.push_back(j);
                 }
         }
-        if(flag){
-                ru2ld[r2lstart+kouho]++;
-                lu2rd[l2rstart-kouho]++;
-                conflictcandidate.insert(i);
-                conflictindex.insert(i);
-        }
+        random_device rnd;
+        mt19937 mt(rnd());
+        int rand = mt()%kouho.size();
+        int next = kouho[rand];
+        ru2ld[r2lstart+next]++;
+        lu2rd[l2rstart-next]++;
+        up2down[next]++;
+        return next;
 }
 
 void eraseconflict(nqueen& state,int var, int value){
@@ -250,7 +248,7 @@ int main(){
         nqueen init(n);
         gettimeofday(&ongoing,NULL);
         printTime(start,ongoing);
-        minconflict(init,100000);
+        minconflict(init,1000);
         gettimeofday(&goal,NULL);
         printTime(ongoing,goal);
         free(up2down);
