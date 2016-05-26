@@ -15,6 +15,8 @@
 
 using namespace std;
 
+int *up2down,*ru2ld,*lu2rd;
+
 class nqueen{
 public:
         nqueen(int n){
@@ -44,9 +46,9 @@ public:
                 }
                 // set<int> up2down;
                 // vector<int> up2down,ru2ld,lu2rd;
-                int *up2down = (int*)malloc(sizeof(int) * size);
-                int *ru2ld = (int*)malloc(sizeof(int) * size*2-1);
-                int *lu2rd = (int*)malloc(sizeof(int) * size*2-1);
+                up2down = (int*)malloc(sizeof(int) * size);
+                ru2ld = (int*)malloc(sizeof(int) * size*2-1);
+                lu2rd = (int*)malloc(sizeof(int) * size*2-1);
                 // int up2down[size];
                 // int ru2ld[size*2-1];
                 // int lu2rd[size*2-1];
@@ -60,7 +62,7 @@ public:
                 }
                 for(int i=0;i<size;i++){
                         bool flag = true;
-                        int kouho,min=100;
+                        int kouho,min=1000;
                         int r2lstart = i;
                         int l2rstart = size-1+i;
                         int start = mt()%size;
@@ -89,6 +91,7 @@ public:
                                 board[i] = kouho;
                                 ru2ld[r2lstart+kouho]++;
                                 lu2rd[l2rstart-kouho]++;
+                                up2down[kouho]++;
                                 conflictcandidate.insert(i);
                                 conflictindex.insert(i);
                         }
@@ -110,9 +113,6 @@ public:
                 }
                 // cout << "conflict number " << conflictindex.size() << endl;
                 conflictcandidate.clear();
-                free(up2down);
-                free(ru2ld);
-                free(lu2rd);
         }
         int size;
         int* board;
@@ -151,40 +151,37 @@ public:
 };
 
 int conflict(nqueen& state,int var){
-        int diff,num;
-        varBinaryHeap bh;
-        for(int i=0;i<state.size;i++){
-                bh.add(make_pair(i,0));
-        }
-        for(int i=0;i<state.size;i++){
-                if(var == i)
-                        continue;
-                num = bh.find(state.board[i]);
-                bh.a[num].second++;
-                bh.trickleDown(num);
-                diff = abs(var-i);
-                if(state.board[i]+diff < state.size){
-                        num = bh.find(state.board[i]+diff);
-                        bh.a[num].second++;
-                        bh.trickleDown(num);
+        int prev = state.board[var];
+        bool flag = true;
+        int kouho,min=1000;
+        int r2lstart = var;
+        int l2rstart = size-1+var;
+        int start = mt()%size;
+        for(int j=0;j<size;j++){
+                int nj = start+j;
+                if(nj >= size)
+                        nj -= size;
+                int u2d = up2down[nj];
+                int r2l = ru2ld[r2lstart+nj];
+                int l2r = lu2rd[l2rstart-nj];
+                if(u2d+r2l+l2r == 0){
+                        ru2ld[r2lstart+nj]++;
+                        lu2rd[l2rstart-nj]++;
+                        up2down[nj]++;
+                        flag = false;
+                        break;
                 }
-                if(0<= state.board[i]-diff){
-                        num = bh.find(state.board[i]-diff);
-                        bh.a[num].second++;
-                        bh.trickleDown(num);
+                if(u2d+r2l+l2r < min){
+                        min = u2d + r2l+l2r;
+                        kouho = nj;
                 }
         }
-        vector<pair<int,int> > mins;
-        pair<int,int> min = bh.findMin();
-        bh.remove();
-        mins.push_back(min);
-        while(bh.findMin().second == mins[0].second){
-                mins.push_back(bh.findMin());
-                bh.remove();
+        if(flag){
+                ru2ld[r2lstart+kouho]++;
+                lu2rd[l2rstart-kouho]++;
+                conflictcandidate.insert(i);
+                conflictindex.insert(i);
         }
-        random_device rnd;
-        int x = rnd()%mins.size();
-        return mins[x].first;
 }
 
 void eraseconflict(nqueen& state,int var, int value){
@@ -256,4 +253,7 @@ int main(){
         minconflict(init,100000);
         gettimeofday(&goal,NULL);
         printTime(ongoing,goal);
+        free(up2down);
+        free(ru2ld);
+        free(lu2rd);
 }
