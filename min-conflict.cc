@@ -1,17 +1,11 @@
 #include <iostream>
 #include <stdio.h>
 #include <vector>
-#include <string>
-#include <set>
 #include <unordered_set>
-#include <unordered_map>
-#include <queue>
 #include <sys/time.h>
 #include <random>
 #include <cmath>
 #include "printTime.h"
-#include "var_binary_heap.h"
-#include "conflict_binary_heap.h"
 
 using namespace std;
 
@@ -28,9 +22,6 @@ public:
                         board[i] = -1;
                 }
                 initialize();
-                // for(int i=0;i<n;i++){
-                //         board[i] = mt()%n;
-                // }
         }
         ~nqueen(){
                 delete board;
@@ -44,16 +35,9 @@ public:
                 for(int i=0;i<size;i++){
                         example[i] = make_pair(i,tmp);
                 }
-                // set<int> up2down;
-                // vector<int> up2down,ru2ld,lu2rd;
                 up2down = (int*)malloc(sizeof(int) * size);
                 ru2ld = (int*)malloc(sizeof(int) * size*2-1);
                 lu2rd = (int*)malloc(sizeof(int) * size*2-1);
-                // int up2down[size];
-                // int ru2ld[size*2-1];
-                // int lu2rd[size*2-1];
-                //Todo
-                //一番最後にconflictlistに入れる
                 for(int i=0;i<size*2-1;i++){
                         if(i<size)
                                 up2down[i] = 0;
@@ -77,7 +61,6 @@ public:
                                         board[i] = nj;
                                         ru2ld[r2lstart+nj]++;
                                         lu2rd[l2rstart-nj]++;
-                                        // up2down.erase(it);
                                         up2down[nj]++;
                                         flag = false;
                                         break;
@@ -98,20 +81,17 @@ public:
                 }
                 //add to conflict list
                 for(auto it = conflictcandidate.begin();it!=conflictcandidate.end();it++){
-                        // cout << *it << endl;
                         for(int i=0;i<size;i++){
                                 if(*it==i)
                                         continue;
                                 int diff = abs(i-*it);
                                 if(board[*it]==board[i] || board[*it]+diff == board[i] || board[*it]-diff == board[i]){
-                                        // cout << *it << " " << i << endl;
                                         if(conflictindex.find(i) == conflictindex.end()){
                                                 conflictindex.insert(i);
                                         }
                                 }
                         }
                 }
-                // cout << "conflict number " << conflictindex.size() << endl;
                 conflictcandidate.clear();
         }
         int size;
@@ -184,7 +164,6 @@ int conflict(nqueen& state,int var){
 
 void eraseconflict(nqueen& state,int var, int value){
         state.conflictindex.erase(var);
-        // state.conflictcandidate.insert(var);
         for(int i=0;i<state.size;i++){
                 if(var==i)
                         continue;
@@ -214,24 +193,19 @@ void addconflict(nqueen& state, int var,int value){
 
 bool minconflict(nqueen& state,int maxsteps){
         for(int i=0;i<maxsteps;i++){
-                // cout << i <<endl;
                 // state.printBoard();
                 if(state.isSolution()){
                         cout << i << "steps" << endl;
                         // state.printBoard();
                         return true;
                 }
-                // cout << " " << state.conflictindex.size() << endl <<endl;
                 random_device rnd;
-                //conflictを起こしてるやつをrandom抽出
-                // int var = state.conflictlist[rnd()%state.conflictlist.size()];
                 int x = rnd()%state.conflictindex.size();
                 auto it = state.conflictindex.begin();
                 for(int i=0;i<x;i++){
                         it++;
                 }
                 int var = *it;
-                //conflictが一番少なくなる位置へ移動
                 int value = conflict(state,var);
                 eraseconflict(state,var,state.board[var]);
                 state.board[var] = value;
